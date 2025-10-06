@@ -22,6 +22,9 @@
         textarea {
             resize: vertical;
         }
+        .input-group {
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 antialiased min-h-screen flex flex-col">
@@ -44,38 +47,45 @@
         };
         // -----------------------------------------------------------------
 
-        // Uygulama ID'si ve Firestore Yolu (Public Veri)
-        const appId = firebaseConfig.projectId; // mete-73d7c
+        // Uygulama ID'si ve Firestore Yolu
+        const appId = firebaseConfig.projectId;
         const PROFILE_DOC_ID = 'main_professional_profile';
         
         let app, db, auth, userId = null;
         let profileDocRef;
 
-        // HTML elementleri
+        // HTML elementleri (Statik)
         const loginScreen = document.getElementById('login-screen');
         const adminContent = document.getElementById('admin-content');
         const loginForm = document.getElementById('login-form');
-        const emailInput = document.getElementById('admin-email');
-        const passwordInput = document.getElementById('admin-password');
         const loginError = document.getElementById('login-error');
         const loginButton = document.getElementById('login-button');
         const logoutButton = document.getElementById('logout-button');
         const saveAdminDataButton = document.getElementById('save-admin-data-btn');
-        const bioTextareaAdmin = document.getElementById('bio-textarea-admin');
-        const fullJsonTextarea = document.getElementById('full-json-textarea');
-        const jsonErrorDiv = document.getElementById('json-error');
         const statusMessage = document.getElementById('status-message');
         const adminTitle = document.getElementById('admin-title');
-        
+
+        // HTML elementleri (Giriş Alanları)
+        const nameInput = document.getElementById('admin-name');
+        const titleInput = document.getElementById('admin-title-job');
+        const bioTextarea = document.getElementById('admin-bio');
+        const linkedinInput = document.getElementById('admin-linkedin');
+        const githubInput = document.getElementById('admin-github');
+        const emailInput = document.getElementById('admin-email-contact');
+
+        // HTML elementleri (Dinamik Listeler)
+        const expertiseContainer = document.getElementById('expertise-items-container');
+        const educationContainer = document.getElementById('education-items-container');
+        const experienceContainer = document.getElementById('experience-items-container');
+
         // Başlangıç verisi (Firestore'da veri yoksa kullanılacak)
         const initialProfileData = {
-            bioText: "Merhaba, ben [Adınız Soyadınız]. Yaratıcı çözümler üreten ve sonuç odaklı bir profesyonelim. On yılı aşkın süredir [Uzmanlık Alanı]'nda çalışıyorum. Temel amacım, teknolojiyi ve stratejik düşünceyi birleştirerek iş süreçlerini dönüştürmektir. Sizinle birlikte yeni projelerde çalışmayı dört gözle bekliyorum.",
             name: "[Adınız Soyadınız]",
             title: "Kıdemli Yazılım Mimarı | Dijital Stratejist",
+            bioText: "Merhaba, ben [Adınız Soyadınız]. Yaratıcı çözümler üreten ve sonuç odaklı bir profesyonelim. On yılı aşkın süredir [Uzmanlık Alanı]'nda çalışıyorum. Temel amacım, teknolojiyi ve stratejik düşünceyi birleştirerek iş süreçlerini dönüştürmektir.",
             expertise: [
                 { name: "Veri Analizi", icon: "bar-chart-2" },
-                { name: "Proje Yönetimi", icon: "git-branch" },
-                { name: "Kullanıcı Deneyimi (UX)", icon: "layers" }
+                { name: "Proje Yönetimi", icon: "git-branch" }
             ],
             socials: {
                 linkedin: "https://linkedin.com/in/profiliniz",
@@ -104,25 +114,19 @@
 
         function initFirebase() {
             try {
-                // Firebase'i başlat ve servisleri al
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                // Firestore Hata ayıklama seviyesini Debug'a ayarla
                 setLogLevel('debug'); 
 
-                // Belge referansını oluştur
                 profileDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', PROFILE_DOC_ID);
 
-                // Auth durumu değiştiğinde tetiklenir
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        // YÖNETİCİ GİRİŞİ YAPILDI
                         userId = user.uid;
                         showAdminPanel();
                         loadProfileData();
                     } else {
-                        // OTURUM KAPALI
                         showLoginScreen();
                     }
                 });
@@ -130,39 +134,39 @@
             } catch (error) {
                 console.error("HATA: Firebase başlatılamadı:", error);
                 loginError.textContent = "HATA: Firebase başlatılamadı. Konsolu kontrol edin.";
-                showLoginScreen(); // Hata olsa bile giriş ekranını göster
+                showLoginScreen();
             }
         }
 
         function showLoginScreen() {
             loginScreen.classList.remove('hidden');
             adminContent.classList.add('hidden');
-            adminTitle.textContent = 'Yönetici Girişi Gerekli';
+            document.getElementById('admin-header-title').textContent = 'Yönetici Girişi Gerekli';
+            logoutButton.classList.add('hidden');
         }
 
         function showAdminPanel() {
             loginScreen.classList.add('hidden');
             adminContent.classList.remove('hidden');
-            adminTitle.textContent = 'Profil İçeriği Düzenleme';
+            document.getElementById('admin-header-title').textContent = 'Profil İçeriği Düzenleme';
+            logoutButton.classList.remove('hidden');
         }
 
         async function attemptLogin(e) {
             e.preventDefault();
             loginError.textContent = '';
-            const email = emailInput.value;
-            const password = passwordInput.value;
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
 
             loginButton.disabled = true;
             loginButton.textContent = 'Giriş Yapılıyor...';
             
             try {
-                // Firebase ile oturum açmayı dene
                 await signInWithEmailAndPassword(auth, email, password);
-                // Başarılı olursa onAuthStateChanged tetiklenecek
                 loginButton.textContent = 'Giriş Yapıldı!';
             } catch (error) {
                 console.error("Giriş hatası:", error);
-                let errorMessage = "Geçersiz e-posta veya parola. (Kurulum talimatlarına bakın)";
+                let errorMessage = "Geçersiz e-posta veya parola. (Firebase Auth kontrol edin)";
                 loginError.textContent = "HATA: " + errorMessage;
                 loginButton.textContent = 'Giriş Yap';
                 loginButton.disabled = false;
@@ -172,7 +176,6 @@
         async function attemptLogout() {
             try {
                 await signOut(auth);
-                // onAuthStateChanged tetiklenecek ve giriş ekranına dönülecek
                 statusMessage.textContent = "Başarıyla çıkış yaptınız.";
                 statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-800');
                 statusMessage.classList.add('bg-yellow-100', 'text-yellow-800');
@@ -180,6 +183,8 @@
                 console.error("Çıkış hatası:", error);
             }
         }
+        
+        // --- VERİ YÖNETİMİ ---
 
         async function loadProfileData() {
             statusMessage.classList.add('hidden');
@@ -189,53 +194,69 @@
                 let dataToEdit;
                 
                 if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    dataToEdit = { ...initialProfileData, ...data }; 
+                    // Mevcut veriyi başlangıç verisi ile birleştir
+                    dataToEdit = { ...initialProfileData, ...docSnap.data() }; 
                 } else {
-                    // Veri yoksa başlangıç verisini yükle ve kaydet
-                    console.log("Profil verisi bulunamadı. Başlangıç verisi oluşturuluyor...");
+                    // Veri yoksa başlangıç verisini kullan ve kaydet (ilk kurulum)
                     dataToEdit = initialProfileData;
                     await setDoc(profileDocRef, initialProfileData);
                 }
+
+                // 1. Statik Alanları Doldur
+                nameInput.value = dataToEdit.name || '';
+                titleInput.value = dataToEdit.title || '';
+                bioTextarea.value = dataToEdit.bioText || '';
                 
-                bioTextareaAdmin.value = dataToEdit.bioText || '';
-                // Sadece yapısal veriyi JSON alanına koy
-                const { bioText, ...restOfData } = dataToEdit;
-                fullJsonTextarea.value = JSON.stringify(restOfData, null, 2);
+                // 2. Sosyal Alanları Doldur
+                linkedinInput.value = dataToEdit.socials?.linkedin || '';
+                githubInput.value = dataToEdit.socials?.github || '';
+                emailInput.value = dataToEdit.socials?.email || '';
+
+                // 3. Dinamik Listeleri Doldur
+                expertiseContainer.innerHTML = '';
+                (dataToEdit.expertise || []).forEach(item => addExpertiseItem(item));
+                
+                educationContainer.innerHTML = '';
+                (dataToEdit.education || []).forEach(item => addEducationItem(item));
+                
+                experienceContainer.innerHTML = '';
+                (dataToEdit.workExperience || []).forEach(item => addExperienceItem(item));
                 
             } catch (error) {
                 console.error("Veri yüklenirken hata:", error);
-                statusMessage.textContent = "HATA: Veri yüklenemedi. Lütfen konsolu kontrol edin.";
+                statusMessage.textContent = "HATA: Veri yüklenemedi. Konsolu kontrol edin.";
                 statusMessage.classList.remove('hidden', 'bg-green-100', 'text-green-800');
                 statusMessage.classList.add('bg-red-100', 'text-red-800');
             }
         }
 
         async function saveAdminData() {
-            jsonErrorDiv.textContent = '';
             statusMessage.classList.add('hidden');
+            saveAdminDataButton.disabled = true;
+            saveAdminDataButton.textContent = 'Kaydediliyor... Lütfen bekleyin.';
             
             if (!userId) {
-                 jsonErrorDiv.textContent = "HATA: Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.";
+                 statusMessage.textContent = "HATA: Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.";
+                 saveAdminDataButton.disabled = false;
+                 saveAdminDataButton.textContent = 'TÜM PROFİLİ KAYDET VE YAYINLA';
                  return;
             }
 
-            const newBioText = bioTextareaAdmin.value;
-            const fullJsonString = fullJsonTextarea.value;
-            let parsedJson = {};
-
             try {
-                // JSON format kontrolü
-                parsedJson = JSON.parse(fullJsonString);
-            } catch (error) {
-                jsonErrorDiv.textContent = "HATA: Yapısal Veri (JSON) formatı geçersiz. Lütfen hatayı düzeltin.";
-                return;
-            }
-            
-            try {
+                // 1. Statik ve Sosyal Verileri Topla
                 const dataToSave = {
-                    bioText: newBioText,
-                    ...parsedJson
+                    name: nameInput.value,
+                    title: titleInput.value,
+                    bioText: bioTextarea.value,
+                    socials: {
+                        linkedin: linkedinInput.value,
+                        github: githubInput.value,
+                        email: emailInput.value
+                    },
+                    // 2. Dinamik Listeleri Topla
+                    expertise: getExpertiseItems(),
+                    education: getEducationItems(),
+                    workExperience: getExperienceItems()
                 };
 
                 // Firestore'a kaydet
@@ -249,17 +270,144 @@
 
             } catch (error) {
                 console.error("Veri kaydedilirken hata oluştu:", error);
-                jsonErrorDiv.textContent = "Kaydetme sırasında Firebase hatası oluştu. Konsolu ve Kuralları kontrol edin.";
+                statusMessage.textContent = "HATA: Kaydetme işlemi başarısız oldu. Konsolu kontrol edin.";
                 statusMessage.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-yellow-100', 'text-yellow-800');
                 statusMessage.classList.add('bg-red-100', 'text-red-800');
-                statusMessage.textContent = "HATA: Kaydetme işlemi başarısız oldu.";
+            } finally {
+                saveAdminDataButton.disabled = false;
+                saveAdminDataButton.textContent = 'TÜM PROFİLİ KAYDET VE YAYINLA';
             }
         }
         
+        // --- DİNAMİK LİSTE YÖNETİMİ FONKSİYONLARI ---
+        
+        function removeParentItem(button) {
+            button.closest('.dynamic-item').remove();
+        }
+
+        /* ------------------ UZMANLIK ALANLARI ------------------ */
+
+        function getExpertiseTemplate(data = { name: '', icon: '' }) {
+            return `
+                <div class="dynamic-item bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm flex items-start space-x-4 mb-3">
+                    <div class="flex-grow grid grid-cols-2 gap-3">
+                        <input type="text" class="expertise-name w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Uzmanlık Adı (örn: React Geliştirme)" value="${data.name}">
+                        <input type="text" class="expertise-icon w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Lucide İkon Adı (örn: feather)" value="${data.icon}">
+                    </div>
+                    <button type="button" onclick="removeParentItem(this)" class="remove-item-btn p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function addExpertiseItem(data) {
+            expertiseContainer.insertAdjacentHTML('beforeend', getExpertiseTemplate(data));
+            lucide.createIcons();
+        }
+
+        function getExpertiseItems() {
+            const items = [];
+            expertiseContainer.querySelectorAll('.dynamic-item').forEach(itemDiv => {
+                const name = itemDiv.querySelector('.expertise-name').value;
+                const icon = itemDiv.querySelector('.expertise-icon').value;
+                if (name) { // Sadece dolu olanları al
+                    items.push({ name, icon });
+                }
+            });
+            return items;
+        }
+
+        /* ------------------ EĞİTİM ------------------ */
+
+        function getEducationTemplate(data = { degree: '', institution: '', years: '', description: '' }) {
+            return `
+                <div class="dynamic-item bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm mb-3">
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <input type="text" class="education-degree w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Derece/Unvan (örn: Yüksek Lisans)" value="${data.degree}">
+                        <input type="text" class="education-institution w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Kurum Adı (örn: İTÜ)" value="${data.institution}">
+                    </div>
+                    <input type="text" class="education-years w-full p-2 border border-gray-300 rounded-lg text-sm mb-3" placeholder="Yıllar (örn: 2018 - 2020)" value="${data.years}">
+                    <textarea class="education-description w-full p-2 border border-gray-300 rounded-lg text-sm mb-3" rows="2" placeholder="Açıklama/Özet">${data.description}</textarea>
+                    <button type="button" onclick="removeParentItem(this)" class="remove-item-btn p-2 w-full bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
+                        <i data-lucide="x" class="w-4 h-4 inline-block align-text-bottom mr-1"></i> Öğeyi Kaldır
+                    </button>
+                </div>
+            `;
+        }
+        
+        function addEducationItem(data) {
+            educationContainer.insertAdjacentHTML('beforeend', getEducationTemplate(data));
+            lucide.createIcons();
+        }
+
+        function getEducationItems() {
+            const items = [];
+            educationContainer.querySelectorAll('.dynamic-item').forEach(itemDiv => {
+                const degree = itemDiv.querySelector('.education-degree').value;
+                const institution = itemDiv.querySelector('.education-institution').value;
+                const years = itemDiv.querySelector('.education-years').value;
+                const description = itemDiv.querySelector('.education-description').value;
+                if (degree && institution) {
+                    items.push({ degree, institution, years, description });
+                }
+            });
+            return items;
+        }
+
+        /* ------------------ DENEYİM ------------------ */
+
+        function getExperienceTemplate(data = { title: '', company: '', years: '', description: '' }) {
+            return `
+                <div class="dynamic-item bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm mb-3">
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <input type="text" class="experience-title w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Pozisyon (örn: Kıdemli Mimar)" value="${data.title}">
+                        <input type="text" class="experience-company w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Şirket Adı (örn: TechNova)" value="${data.company}">
+                    </div>
+                    <input type="text" class="experience-years w-full p-2 border border-gray-300 rounded-lg text-sm mb-3" placeholder="Yıllar (örn: 2020 - Devam Ediyor)" value="${data.years}">
+                    <textarea class="experience-description w-full p-2 border border-gray-300 rounded-lg text-sm mb-3" rows="2" placeholder="Görevler/Başarılar (Özet)">${data.description}</textarea>
+                    <button type="button" onclick="removeParentItem(this)" class="remove-item-btn p-2 w-full bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
+                        <i data-lucide="x" class="w-4 h-4 inline-block align-text-bottom mr-1"></i> Öğeyi Kaldır
+                    </button>
+                </div>
+            `;
+        }
+
+        function addExperienceItem(data) {
+            experienceContainer.insertAdjacentHTML('beforeend', getExperienceTemplate(data));
+            lucide.createIcons();
+        }
+
+        function getExperienceItems() {
+            const items = [];
+            experienceContainer.querySelectorAll('.dynamic-item').forEach(itemDiv => {
+                const title = itemDiv.querySelector('.experience-title').value;
+                const company = itemDiv.querySelector('.experience-company').value;
+                const years = itemDiv.querySelector('.experience-years').value;
+                const description = itemDiv.querySelector('.experience-description').value;
+                if (title && company) {
+                    items.push({ title, company, years, description });
+                }
+            });
+            return items;
+        }
+
+        // Globalde erişilebilir kılmak için
+        window.removeParentItem = removeParentItem;
+        window.addExpertiseItem = addExpertiseItem;
+        window.addEducationItem = addEducationItem;
+        window.addExperienceItem = addExperienceItem;
+
+
         // --- EVENT LISTENERS ---
         loginForm.addEventListener('submit', attemptLogin);
         logoutButton.addEventListener('click', attemptLogout);
         saveAdminDataButton.addEventListener('click', saveAdminData);
+
+        // Dinamik liste ekleme butonları
+        document.getElementById('add-expertise-btn').addEventListener('click', () => addExpertiseItem({}));
+        document.getElementById('add-education-btn').addEventListener('click', () => addEducationItem({}));
+        document.getElementById('add-experience-btn').addEventListener('click', () => addExperienceItem({}));
 
         // Uygulamayı başlat
         window.onload = initFirebase;
@@ -268,7 +416,7 @@
     <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="container mx-auto p-4 flex justify-between items-center">
-            <h1 id="admin-title" class="text-2xl font-bold text-gray-800">Yönetici Paneli</h1>
+            <h1 id="admin-header-title" class="text-2xl font-bold text-gray-800">Yönetici Paneli</h1>
             <nav class="flex space-x-4">
                 <a href="index.html" class="flex items-center space-x-1 text-gray-600 hover:text-accent transition duration-300">
                     <i data-lucide="eye" class="w-5 h-5"></i>
@@ -287,7 +435,7 @@
         
         <!-- YÖNETİCİ GİRİŞ EKRANI -->
         <div id="login-screen" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl hidden">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Giriş Yap</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Yönetici Girişi</h2>
             <form id="login-form" class="space-y-4">
                 <div>
                     <label for="admin-email" class="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
@@ -301,7 +449,7 @@
                     Giriş Yap
                 </button>
                 <p id="login-error" class="text-sm text-red-500 mt-2 text-center"></p>
-                <p class="text-xs text-gray-500 text-center mt-4">Bu alan sadece **Firebase Authentication** ile kayıtlı yöneticiler içindir.</p>
+                <p class="text-xs text-gray-500 text-center mt-4">Sadece kayıtlı Firebase Auth kullanıcıları içindir.</p>
             </form>
         </div>
         
@@ -311,27 +459,96 @@
             <!-- Durum Mesajı -->
             <div id="status-message" class="p-4 rounded-lg font-medium text-sm text-center hidden" role="alert"></div>
 
-            <!-- 1. Biyografi Metni Düzenleme -->
+            <!-- Ana Bilgiler (İsim, Unvan, Biyografi) -->
             <section class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2 border-b pb-2">
-                    <i data-lucide="file-text" class="w-5 h-5 text-accent"></i>
-                    <span>1. Hakkımda / Biyografi Metni</span>
+                    <i data-lucide="user-circle" class="w-5 h-5 text-accent"></i>
+                    <span>1. Temel Profil Bilgileri</span>
                 </h2>
-                <textarea id="bio-textarea-admin" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent"></textarea>
-                <p class="text-xs text-gray-500 mt-1">Bu alana düz metin girin. HTML etiketleri kullanmayın.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="admin-name" class="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
+                        <input type="text" id="admin-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="Mete Öztürk">
+                    </div>
+                    <div class="input-group">
+                        <label for="admin-title-job" class="block text-sm font-medium text-gray-700 mb-1">Pozisyon / Unvan</label>
+                        <input type="text" id="admin-title-job" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="Kıdemli Yazılım Mimarı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="admin-bio" class="block text-sm font-medium text-gray-700 mb-1">Hakkımda / Biyografi Metni</label>
+                    <textarea id="admin-bio" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent"></textarea>
+                </div>
             </section>
             
-            <!-- 2. Yapısal Veri (JSON) Düzenleme -->
+            <!-- Sosyal Medya Bağlantıları -->
             <section class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2 border-b pb-2">
-                    <i data-lucide="code" class="w-5 h-5 text-accent"></i>
-                    <span>2. Yapısal Veri (İsim, Kariyer, Eğitim, Sosyal)</span>
+                    <i data-lucide="link" class="w-5 h-5 text-accent"></i>
+                    <span>2. Sosyal Medya ve İletişim</span>
                 </h2>
-                <textarea id="full-json-textarea" rows="20" class="w-full p-3 font-mono text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent"></textarea>
-                <p class="text-xs text-gray-500 mt-1">Tüm listeleri, isim ve başlığı bu JSON formatında düzenleyin. **JSON formatını bozmamaya dikkat edin.**</p>
-                <p id="json-error" class="text-sm text-red-500 mt-2"></p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="input-group">
+                        <label for="admin-linkedin" class="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
+                        <input type="url" id="admin-linkedin" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="https://linkedin.com/in/...">
+                    </div>
+                    <div class="input-group">
+                        <label for="admin-github" class="block text-sm font-medium text-gray-700 mb-1">GitHub URL</label>
+                        <input type="url" id="admin-github" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="https://github.com/...">
+                    </div>
+                    <div class="input-group">
+                        <label for="admin-email-contact" class="block text-sm font-medium text-gray-700 mb-1">E-posta Adresi (mailto:)</label>
+                        <input type="text" id="admin-email-contact" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="mailto:eposta@adresiniz.com">
+                    </div>
+                </div>
             </section>
             
+            <!-- Uzmanlık Alanları -->
+            <section class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2 border-b pb-2">
+                    <i data-lucide="feather" class="w-5 h-5 text-accent"></i>
+                    <span>3. Uzmanlık Alanları (Anahtar Beceriler)</span>
+                </h2>
+                <div id="expertise-items-container" class="space-y-3">
+                    <!-- Dinamik Uzmanlık Öğeleri Buraya Eklenecek -->
+                </div>
+                <button type="button" id="add-expertise-btn" class="w-full mt-4 p-3 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition duration-300 flex items-center justify-center space-x-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    <span>Uzmanlık Alanı Ekle</span>
+                </button>
+            </section>
+            
+            <!-- Eğitim Geçmişi -->
+            <section class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2 border-b pb-2">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 text-accent"></i>
+                    <span>4. Eğitim Geçmişi</span>
+                </h2>
+                <div id="education-items-container" class="space-y-3">
+                    <!-- Dinamik Eğitim Öğeleri Buraya Eklenecek -->
+                </div>
+                <button type="button" id="add-education-btn" class="w-full mt-4 p-3 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition duration-300 flex items-center justify-center space-x-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    <span>Eğitim Öğesi Ekle</span>
+                </button>
+            </section>
+            
+            <!-- İş Deneyimi -->
+            <section class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2 border-b pb-2">
+                    <i data-lucide="briefcase" class="w-5 h-5 text-accent"></i>
+                    <span>5. İş Deneyimi</span>
+                </h2>
+                <div id="experience-items-container" class="space-y-3">
+                    <!-- Dinamik Deneyim Öğeleri Buraya Eklenecek -->
+                </div>
+                <button type="button" id="add-experience-btn" class="w-full mt-4 p-3 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition duration-300 flex items-center justify-center space-x-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    <span>Deneyim Öğesi Ekle</span>
+                </button>
+            </section>
+
+
             <!-- Kaydet Butonu -->
             <button id="save-admin-data-btn" class="w-full bg-accent text-white font-extrabold py-4 rounded-xl text-lg shadow-lg hover:bg-red-600 transition duration-300 flex items-center justify-center space-x-2">
                 <i data-lucide="save" class="w-6 h-6"></i>
