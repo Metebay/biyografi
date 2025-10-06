@@ -13,7 +13,6 @@
         :root {
             font-family: 'Inter', sans-serif;
         }
-        /* Özel renkler ve stiller */
         .text-accent {
             color: #ef4444; /* Tailwind red-500 */
         }
@@ -26,7 +25,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background-color: #e5e7eb; /* Gray-200 */
+            background-color: #e5e7eb;
         }
     </style>
 </head>
@@ -114,18 +113,12 @@
             titleElement.textContent = data.title || 'Pozisyonunuz | Uzmanlık Alanınız';
             bioElement.textContent = data.bioText || 'Hakkımda metni henüz girilmemiş.';
 
-            // ✅ Profil Fotoğrafı
-            const profileDiv = document.querySelector('.w-32.h-32.rounded-full');
-            if (data.profilePhoto) {
-                profileDiv.style.backgroundImage = `url('${data.profilePhoto}')`;
-                profileDiv.style.backgroundSize = 'cover';
-                profileDiv.style.backgroundPosition = 'center';
-                profileDiv.innerHTML = '';
-            } else {
-                profileDiv.innerHTML = `<i data-lucide="user" class="w-16 h-16"></i>`;
-            }
+            // Profil Fotoğrafı
+            const profilePhotoDiv = document.getElementById('profile-photo');
+            profilePhotoDiv.innerHTML = `
+                <img src="${data.photoURL || 'https://via.placeholder.com/150'}" alt="Profil Resmi" class="w-full h-full object-cover">
+            `;
 
-            // Uzmanlık Alanları
             expertiseContainer.innerHTML = (data.expertise || []).map(item => `
                 <div class="flex items-center space-x-2 bg-white p-3 rounded-xl shadow-md transition duration-300 hover:shadow-lg hover:border-accent border border-transparent">
                     <i data-lucide="${item.icon || 'star'}" class="w-5 h-5 text-accent flex-shrink-0"></i>
@@ -133,7 +126,6 @@
                 </div>
             `).join('');
 
-            // Sosyal Medya
             socialContainer.innerHTML = Object.entries(data.socials || {}).map(([key, url]) => {
                 if (!url || key === 'email') return '';
                 const iconMap = { linkedin: 'linkedin', github: 'github', twitter: 'twitter' };
@@ -150,7 +142,6 @@
                 </a>
             ` : '');
 
-            // Eğitim
             educationContainer.innerHTML = (data.education || []).map(item => `
                 <div class="relative mb-6 pl-8">
                     <div class="absolute w-4 h-4 rounded-full bg-accent -left-2 border-4 border-gray-50 z-10"></div>
@@ -163,7 +154,6 @@
                 </div>
             `).join('');
 
-            // Deneyim
             experienceContainer.innerHTML = (data.workExperience || []).map(item => `
                 <div class="relative mb-6 pl-8">
                     <div class="absolute w-4 h-4 rounded-full bg-accent -left-2 border-4 border-gray-50 z-10"></div>
@@ -190,13 +180,17 @@
     </div>
 
     <div id="main-content" class="container mx-auto p-4 sm:p-8 lg:p-12 hidden">
+
         <section class="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl mb-12 border-t-8 border-accent">
             <div class="text-center">
-                <div class="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-4 flex items-center justify-center text-4xl text-gray-500 font-bold border-4 border-white shadow-inner">
-                    <i data-lucide="user" class="w-16 h-16"></i>
+                <!-- PROFİL FOTOĞRAFI -->
+                <div id="profile-photo" class="w-32 h-32 rounded-full mx-auto mb-4 overflow-hidden border-4 border-white shadow-inner">
+                    <img src="https://via.placeholder.com/150" alt="Profil Resmi" class="w-full h-full object-cover">
                 </div>
+
                 <h1 id="profile-name" class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2">Adınız Soyadınız</h1>
                 <h2 id="profile-title" class="text-xl sm:text-2xl font-semibold text-accent mb-6">Pozisyonunuz | Uzmanlık Alanınız</h2>
+                
                 <div id="social-container" class="flex justify-center space-x-6 mb-8 border-t border-b py-4"></div>
                 <p id="profile-bio" class="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">Biyografi metni buraya gelecek.</p>
             </div>
@@ -212,6 +206,7 @@
                     <div id="expertise-container" class="space-y-3"></div>
                 </section>
             </div>
+
             <div class="lg:col-span-2 space-y-12">
                 <section class="p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
                     <h3 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6 flex items-center space-x-2">
