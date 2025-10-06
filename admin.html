@@ -35,20 +35,12 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- SABİT FIREBASE YAPILANDIRMASI (EN SON GÜNCEL) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBF0bchfUsw4yo1q1wU-rowR8RZ24CDgJ0",
-            authDomain: "mete-73d7c.firebaseapp.com",
-            projectId: "mete-73d7c",
-            storageBucket: "mete-73d7c.firebasestorage.app",
-            messagingSenderId: "785562796791",
-            appId: "1:785562796791:web:4ee9767daf4a13a981c9f2",
-            measurementId: "G-191XRBGG83"
-        };
-        // -----------------------------------------------------------------
-
-        // Uygulama ID'si ve Firestore Yolu
-        const appId = firebaseConfig.projectId;
+        // --- ZORUNLU FIREBASE YAPILANDIRMASI (Global Değişkenler) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // -----------------------------------------------------------
+        
+        // Firestore Yolu
         const PROFILE_DOC_ID = 'main_professional_profile';
         
         let app, db, auth, userId = null;
@@ -63,12 +55,13 @@
         const logoutButton = document.getElementById('logout-button');
         const saveAdminDataButton = document.getElementById('save-admin-data-btn');
         const statusMessage = document.getElementById('status-message');
-        const adminTitle = document.getElementById('admin-title');
 
         // HTML elementleri (Giriş Alanları)
         const nameInput = document.getElementById('admin-name');
         const titleInput = document.getElementById('admin-title-job');
         const bioTextarea = document.getElementById('admin-bio');
+        const imageUrlInput = document.getElementById('admin-profile-image-url'); // YENİ
+        const imagePreview = document.getElementById('admin-image-preview');      // YENİ
         const linkedinInput = document.getElementById('admin-linkedin');
         const githubInput = document.getElementById('admin-github');
         const emailInput = document.getElementById('admin-email-contact');
@@ -83,6 +76,7 @@
             name: "[Adınız Soyadınız]",
             title: "Kıdemli Yazılım Mimarı | Dijital Stratejist",
             bioText: "Merhaba, ben [Adınız Soyadınız]. Yaratıcı çözümler üreten ve sonuç odaklı bir profesyonelim. On yılı aşkın süredir [Uzmanlık Alanı]'nda çalışıyorum. Temel amacım, teknolojiyi ve stratejik düşünceyi birleştirerek iş süreçlerini dönüştürmektir.",
+            imageUrl: "https://placehold.co/150x150/ef4444/white?text=Y%C3%BCksek%C3%A7%C3%B6z%C3%BCn%C3%BCrl%C3%BCkl%C3%BC+Profil", // YENİ
             expertise: [
                 { name: "Veri Analizi", icon: "bar-chart-2" },
                 { name: "Proje Yönetimi", icon: "git-branch" }
@@ -114,11 +108,19 @@
 
         function initFirebase() {
             try {
+                // Firebase Config boşsa, sadece demo modunda çalışır.
+                if (Object.keys(firebaseConfig).length === 0) {
+                    console.warn("UYARI: Firebase yapılandırması eksik. Uygulama yalnızca yerel olarak çalışacaktır.");
+                    showLoginScreen();
+                    return;
+                }
+
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 setLogLevel('debug'); 
 
+                // Profil belgesi yolu
                 profileDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', PROFILE_DOC_ID);
 
                 onAuthStateChanged(auth, (user) => {
@@ -184,6 +186,17 @@
             }
         }
         
+        // GÖRSEL ÖNİZLEME FONKSİYONU (YENİ)
+        function updateImagePreview(url) {
+            const fallbackUrl = 'https://placehold.co/150x150/cccccc/333333?text=Profil';
+            const finalUrl = (url && (url.startsWith('http') || url.startsWith('data:'))) ? url : fallbackUrl;
+            
+            imagePreview.src = finalUrl;
+            imagePreview.onerror = () => {
+                 imagePreview.src = fallbackUrl;
+            };
+        }
+
         // --- VERİ YÖNETİMİ ---
 
         async function loadProfileData() {
@@ -207,6 +220,11 @@
                 titleInput.value = dataToEdit.title || '';
                 bioTextarea.value = dataToEdit.bioText || '';
                 
+                // Resim URL'si ve Önizleme (YENİ)
+                const imageUrl = dataToEdit.imageUrl || initialProfileData.imageUrl;
+                imageUrlInput.value = imageUrl;
+                updateImagePreview(imageUrl);
+
                 // 2. Sosyal Alanları Doldur
                 linkedinInput.value = dataToEdit.socials?.linkedin || '';
                 githubInput.value = dataToEdit.socials?.github || '';
@@ -236,10 +254,10 @@
             saveAdminDataButton.textContent = 'Kaydediliyor... Lütfen bekleyin.';
             
             if (!userId) {
-                 statusMessage.textContent = "HATA: Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.";
-                 saveAdminDataButton.disabled = false;
-                 saveAdminDataButton.textContent = 'TÜM PROFİLİ KAYDET VE YAYINLA';
-                 return;
+                statusMessage.textContent = "HATA: Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.";
+                saveAdminDataButton.disabled = false;
+                saveAdminDataButton.textContent = 'TÜM PROFİLİ KAYDET VE YAYINLA';
+                return;
             }
 
             try {
@@ -248,6 +266,7 @@
                     name: nameInput.value,
                     title: titleInput.value,
                     bioText: bioTextarea.value,
+                    imageUrl: imageUrlInput.value, // YENİ ALAN
                     socials: {
                         linkedin: linkedinInput.value,
                         github: githubInput.value,
@@ -403,6 +422,9 @@
         loginForm.addEventListener('submit', attemptLogin);
         logoutButton.addEventListener('click', attemptLogout);
         saveAdminDataButton.addEventListener('click', saveAdminData);
+        
+        // Resim URL'si girişi için anlık önizleme (YENİ)
+        imageUrlInput.addEventListener('input', (e) => updateImagePreview(e.target.value));
 
         // Dinamik liste ekleme butonları
         document.getElementById('add-expertise-btn').addEventListener('click', () => addExpertiseItem({}));
@@ -465,17 +487,33 @@
                     <i data-lucide="user-circle" class="w-5 h-5 text-accent"></i>
                     <span>1. Temel Profil Bilgileri</span>
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="input-group">
                         <label for="admin-name" class="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
                         <input type="text" id="admin-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="Mete Öztürk">
                     </div>
-                    <div class="input-group">
+                    <div class="input-group col-span-2">
                         <label for="admin-title-job" class="block text-sm font-medium text-gray-700 mb-1">Pozisyon / Unvan</label>
                         <input type="text" id="admin-title-job" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="Kıdemli Yazılım Mimarı">
                     </div>
                 </div>
-                <div class="input-group">
+                
+                <!-- Resim Ekleme Alanı (YENİ) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div class="input-group md:col-span-2">
+                        <label for="admin-profile-image-url" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                            <i data-lucide="image" class="w-4 h-4 mr-1 text-gray-500"></i> Profil Resmi URL'si
+                        </label>
+                        <input type="url" id="admin-profile-image-url" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="https://ornek.com/profil-resmi.jpg">
+                        <p class="text-xs text-gray-500 mt-1">Sadece harici resim URL'sini buraya yapıştırın.</p>
+                    </div>
+                    <div class="input-group flex flex-col items-center justify-start pt-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Canlı Önizleme</label>
+                        <img id="admin-image-preview" src="https://placehold.co/150x150/cccccc/333333?text=Profil" alt="Profil Resmi Önizleme" class="w-24 h-24 object-cover rounded-full shadow-lg border-4 border-gray-200">
+                    </div>
+                </div>
+                
+                <div class="input-group mt-4">
                     <label for="admin-bio" class="block text-sm font-medium text-gray-700 mb-1">Hakkımda / Biyografi Metni</label>
                     <textarea id="admin-bio" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent"></textarea>
                 </div>
@@ -560,10 +598,12 @@
     
     <!-- Footer -->
     <footer class="text-center py-6 mt-auto border-t border-gray-200">
-        <p class="text-gray-500 text-sm">Yönetici Paneli - Proje ID: mete-73d7c</p>
+        <p class="text-gray-500 text-sm">Yönetici Paneli - Proje ID: <span class="font-semibold text-gray-600" id="footer-app-id"></span></p>
     </footer>
 
     <script>
+        // Footer'daki proje ID'sini güncelle
+        document.getElementById('footer-app-id').textContent = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         lucide.createIcons();
     </script>
 </body>
