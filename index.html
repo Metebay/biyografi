@@ -3,218 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">Yükleniyor...</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Profesyonel Portföy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        :root {
-            font-family: 'Inter', sans-serif;
-        }
-        .text-accent {
-            color: #ef4444; /* Tailwind red-500 */
-        }
-        .bg-accent {
-            background-color: #ef4444;
-        }
-        .timeline-line {
-            position: absolute;
-            left: 12px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #e5e7eb;
-        }
+        :root { font-family: 'Inter', sans-serif; }
+        .text-accent { color: #ef4444; }
+        .bg-accent { background-color: #ef4444; }
+        .timeline-line { position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background-color: #e5e7eb; }
     </style>
 </head>
 <body class="bg-gray-50 antialiased">
 
-    <!-- Firebase SDK Imports (Sadece okuma için Firestore) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <div class="container mx-auto p-4 sm:p-8 lg:p-12">
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBF0bchfUsw4yo1q1wU-rowR8RZ24CDgJ0",
-            authDomain: "mete-73d7c.firebaseapp.com",
-            projectId: "mete-73d7c",
-            storageBucket: "mete-73d7c.firebasestorage.app",
-            messagingSenderId: "785562796791",
-            appId: "1:785562796791:web:4ee9767daf4a13a981c9f2",
-            measurementId: "G-191XRBGG83"
-        };
-
-        let db;
-        const appId = firebaseConfig.projectId;
-        const PROFILE_DOC_ID = 'main_professional_profile';
-
-        const mainContent = document.getElementById('main-content');
-        const loadingScreen = document.getElementById('loading-screen');
-
-        const nameElement = document.getElementById('profile-name');
-        const titleElement = document.getElementById('profile-title');
-        const bioElement = document.getElementById('profile-bio');
-        const expertiseContainer = document.getElementById('expertise-container');
-        const educationContainer = document.getElementById('education-container');
-        const experienceContainer = document.getElementById('experience-container');
-        const socialContainer = document.getElementById('social-container');
-
-        async function setupFirebase() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-
-                const profileDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', PROFILE_DOC_ID);
-
-                onSnapshot(profileDocRef, (docSnap) => {
-                    loadingScreen.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
-
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        renderProfile(data);
-                    } else {
-                        mainContent.innerHTML = `
-                            <div class="text-center p-10 bg-white shadow-xl rounded-xl">
-                                <i data-lucide="alert-triangle" class="w-16 h-16 text-yellow-500 mx-auto mb-4"></i>
-                                <h2 class="text-2xl font-bold mb-2 text-gray-800">Profil Verisi Bulunamadı</h2>
-                                <p class="text-gray-600 mb-6">Lütfen yönetici moduna giderek ilk profilinizi oluşturun.</p>
-                                <a href="admin.html" class="inline-flex items-center space-x-2 bg-accent text-white font-semibold py-2 px-6 rounded-full hover:bg-red-600 transition duration-300">
-                                    <i data-lucide="wrench-screwdriver" class="w-5 h-5"></i>
-                                    <span>Yönetici Moduna Git</span>
-                                </a>
-                            </div>
-                        `;
-                        lucide.createIcons();
-                    }
-                }, (error) => {
-                    console.error("Firestore dinlenirken hata oluştu:", error);
-                    loadingScreen.classList.add('hidden');
-                    mainContent.innerHTML = `
-                        <div class="text-center p-10 bg-white shadow-xl rounded-xl">
-                            <i data-lucide="x-circle" class="w-16 h-16 text-red-600 mx-auto mb-4"></i>
-                            <h2 class="text-2xl font-bold mb-2 text-gray-800">Hata: Veritabanı Bağlantısı</h2>
-                            <p class="text-gray-600">Bu genellikle Güvenlik Kuralları ile ilgilidir. Lütfen Firebase kurallarınızın okumaya izin verdiğinden emin olun.</p>
-                        </div>
-                    `;
-                    lucide.createIcons();
-                });
-
-            } catch (error) {
-                console.error("Uygulama başlatılırken hata oluştu:", error);
-            }
-        }
-
-        function renderProfile(data) {
-            document.getElementById('page-title').textContent = (data.name || 'Profesyonel') + ' Portföy';
-            nameElement.textContent = data.name || 'Adınız Soyadınız';
-            titleElement.textContent = data.title || 'Pozisyonunuz | Uzmanlık Alanınız';
-            bioElement.textContent = data.bioText || 'Hakkımda metni henüz girilmemiş.';
-
-            // Profil Fotoğrafı
-            const profilePhotoDiv = document.getElementById('profile-photo');
-            profilePhotoDiv.innerHTML = `
-                <img src="${data.photoURL || 'https://via.placeholder.com/150'}" alt="Profil Resmi" class="w-full h-full object-cover">
-            `;
-
-            expertiseContainer.innerHTML = (data.expertise || []).map(item => `
-                <div class="flex items-center space-x-2 bg-white p-3 rounded-xl shadow-md transition duration-300 hover:shadow-lg hover:border-accent border border-transparent">
-                    <i data-lucide="${item.icon || 'star'}" class="w-5 h-5 text-accent flex-shrink-0"></i>
-                    <span class="text-sm font-medium text-gray-700">${item.name}</span>
-                </div>
-            `).join('');
-
-            socialContainer.innerHTML = Object.entries(data.socials || {}).map(([key, url]) => {
-                if (!url || key === 'email') return '';
-                const iconMap = { linkedin: 'linkedin', github: 'github', twitter: 'twitter' };
-                const icon = iconMap[key] || 'link';
-                const label = key.charAt(0).toUpperCase() + key.slice(1);
-                return `
-                    <a href="${url}" target="_blank" class="text-gray-500 hover:text-accent transition duration-300 transform hover:scale-110" aria-label="${label}">
-                        <i data-lucide="${icon}" class="w-7 h-7"></i>
-                    </a>
-                `;
-            }).join('') + (data.socials?.email ? `
-                <a href="${data.socials.email}" class="text-gray-500 hover:text-accent transition duration-300 transform hover:scale-110" aria-label="E-posta">
-                    <i data-lucide="mail" class="w-7 h-7"></i>
-                </a>
-            ` : '');
-
-            educationContainer.innerHTML = (data.education || []).map(item => `
-                <div class="relative mb-6 pl-8">
-                    <div class="absolute w-4 h-4 rounded-full bg-accent -left-2 border-4 border-gray-50 z-10"></div>
-                    <div class="p-4 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition duration-300">
-                        <h3 class="font-bold text-gray-800 text-lg">${item.degree}</h3>
-                        <p class="text-sm text-accent font-semibold">${item.institution}</p>
-                        <p class="text-xs text-gray-500 mb-2">${item.years}</p>
-                        <p class="text-gray-600 text-sm">${item.description}</p>
-                    </div>
-                </div>
-            `).join('');
-
-            experienceContainer.innerHTML = (data.workExperience || []).map(item => `
-                <div class="relative mb-6 pl-8">
-                    <div class="absolute w-4 h-4 rounded-full bg-accent -left-2 border-4 border-gray-50 z-10"></div>
-                    <div class="p-4 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition duration-300">
-                        <h3 class="font-bold text-gray-800 text-lg">${item.title}</h3>
-                        <p class="text-sm text-accent font-semibold">${item.company}</p>
-                        <p class="text-xs text-gray-500 mb-2">${item.years}</p>
-                        <p class="text-gray-600 text-sm">${item.description}</p>
-                    </div>
-                </div>
-            `).join('');
-
-            lucide.createIcons();
-        }
-
-        window.onload = setupFirebase;
-    </script>
-
-    <div id="loading-screen" class="min-h-screen flex items-center justify-center">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-accent mx-auto"></div>
-            <p class="mt-4 text-lg text-gray-500">Profil yükleniyor...</p>
-        </div>
-    </div>
-
-    <div id="main-content" class="container mx-auto p-4 sm:p-8 lg:p-12 hidden">
-
-        <section class="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl mb-12 border-t-8 border-accent">
-            <div class="text-center">
+        <!-- Üst Kısım: Profil Fotoğrafı ve Bilgiler -->
+        <section class="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl mb-12 border-t-8 border-accent text-center">
+            <div class="w-32 h-32 rounded-full mx-auto mb-4 overflow-hidden border-4 border-white shadow-inner">
                 <!-- PROFİL FOTOĞRAFI -->
-                <div id="profile-photo" class="w-32 h-32 rounded-full mx-auto mb-4 overflow-hidden border-4 border-white shadow-inner">
-                    <img src="https://via.placeholder.com/150" alt="Profil Resmi" class="w-full h-full object-cover">
-                </div>
-
-                <h1 id="profile-name" class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2">Adınız Soyadınız</h1>
-                <h2 id="profile-title" class="text-xl sm:text-2xl font-semibold text-accent mb-6">Pozisyonunuz | Uzmanlık Alanınız</h2>
-                
-                <div id="social-container" class="flex justify-center space-x-6 mb-8 border-t border-b py-4"></div>
-                <p id="profile-bio" class="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">Biyografi metni buraya gelecek.</p>
+                <img src="https://picsum.photos/200" alt="Profil Resmi" class="w-full h-full object-cover">
             </div>
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2">Adınız Soyadınız</h1>
+            <h2 class="text-xl sm:text-2xl font-semibold text-accent mb-6">Pozisyonunuz | Uzmanlık Alanınız</h2>
+            
+            <div class="flex justify-center space-x-6 mb-8 border-t border-b py-4">
+                <a href="#" class="text-gray-500 hover:text-accent transition duration-300 transform hover:scale-110" aria-label="LinkedIn">
+                    <i data-lucide="linkedin" class="w-7 h-7"></i>
+                </a>
+                <a href="#" class="text-gray-500 hover:text-accent transition duration-300 transform hover:scale-110" aria-label="GitHub">
+                    <i data-lucide="github" class="w-7 h-7"></i>
+                </a>
+            </div>
+
+            <p class="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">
+                Biyografi metni buraya gelecek. Hakkınızda kısa bir açıklama yazabilirsiniz.
+            </p>
         </section>
 
+        <!-- Orta Kısım: Uzmanlık ve Deneyim/Eğitim -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            
+            <!-- Sol Sütun: Uzmanlık Alanları -->
             <div class="lg:col-span-1">
                 <section class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 sticky top-20">
                     <h3 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4 flex items-center space-x-2">
                         <i data-lucide="feather" class="w-6 h-6 text-accent"></i>
                         <span>Uzmanlık Alanları</span>
                     </h3>
-                    <div id="expertise-container" class="space-y-3"></div>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-2 bg-white p-3 rounded-xl shadow-md">
+                            <i data-lucide="star" class="w-5 h-5 text-accent"></i>
+                            <span class="text-sm font-medium text-gray-700">Web Geliştirme</span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-white p-3 rounded-xl shadow-md">
+                            <i data-lucide="star" class="w-5 h-5 text-accent"></i>
+                            <span class="text-sm font-medium text-gray-700">UI/UX Tasarım</span>
+                        </div>
+                    </div>
                 </section>
             </div>
 
+            <!-- Sağ Sütun: Eğitim ve Deneyim -->
             <div class="lg:col-span-2 space-y-12">
+
                 <section class="p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
                     <h3 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6 flex items-center space-x-2">
                         <i data-lucide="graduation-cap" class="w-6 h-6 text-accent"></i>
                         <span>Eğitim Geçmişi</span>
                     </h3>
-                    <div id="education-container" class="relative">
+                    <div class="relative">
                         <div class="timeline-line"></div>
+                        <div class="relative mb-6 pl-8">
+                            <div class="absolute w-4 h-4 rounded-full bg-accent -left-2 border-4 border-gray-50 z-10"></div>
+                            <div class="p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                                <h3 class="font-bold text-gray-800 text-lg">Bilgisayar Mühendisliği</h3>
+                                <p class="text-sm text-accent font-semibold">XYZ Üniversitesi</p>
+                                <p class="text-xs text-gray-500 mb-2">2018 - 2022</p>
+                                <p class="text-gray-600 text-sm">Yazılım geliştirme ve algoritmalar üzerine eğitim.</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -223,17 +91,29 @@
                         <i data-lucide="briefcase" class="w-6 h-6 text-accent"></i>
                         <span>İş Deneyimi</span>
                     </h3>
-                    <div id="experience-container" class="relative">
+                    <div class="relative">
                         <div class="timeline-line"></div>
+                        <div class="relative mb-6 pl-8">
+                            <div class="absolute w-4 h-4 rounded-full bg-accent -left-2 border-4 border-gray-50 z-10"></div>
+                            <div class="p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                                <h3 class="font-bold text-gray-800 text-lg">Frontend Developer</h3>
+                                <p class="text-sm text-accent font-semibold">ABC Teknoloji</p>
+                                <p class="text-xs text-gray-500 mb-2">2022 - Günümüz</p>
+                                <p class="text-gray-600 text-sm">Web uygulamaları geliştirme ve tasarım iyileştirmeleri.</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
+
             </div>
         </div>
 
         <footer class="text-center py-10 mt-12 border-t border-gray-200">
             <p class="text-gray-500 text-sm">© 2025 Tüm Hakları Saklıdır. BAYINDIR MEDYA</p>
         </footer>
+
     </div>
 
+    <script>lucide.createIcons();</script>
 </body>
 </html>
