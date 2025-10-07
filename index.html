@@ -8,26 +8,116 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        :root {
-            font-family: 'Inter', sans-serif;
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    :root {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* RENK PALETİ DEĞİŞİKLİĞİ */
+    .text-accent {
+        color: #3b82f6; /* Mavi tonu */
+    }
+    .bg-accent {
+        background-color: #3b82f6;
+    }
+    
+    /* ARKA PLAN DEĞİŞİKLİĞİ */
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    
+    /* KART TASARIMI */
+    section {
+        border-radius: 20px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: none;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* PROFİL FOTOĞRAFI */
+    #profile-photo {
+        border: 6px solid white;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    /* BAŞLIK STİLLERİ */
+    #profile-name {
+        background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    /* ZAMAN ÇİZELGESİ */
+    .timeline-line {
+        background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+    }
+    
+    /* UZMANLIK KARTLARI */
+    #expertise-container > div {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    #expertise-container > div:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.1), 0 10px 10px -5px rgba(59, 130, 246, 0.04);
+    }
+    
+    /* SOSYAL MEDYA İKONLARI */
+    #social-container a {
+        background: #f1f5f9;
+        padding: 10px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    #social-container a:hover {
+        background: #3b82f6;
+        transform: translateY(-3px);
+    }
+    
+    /* EĞİTİM VE DENEYİM KARTLARI */
+    #education-container > div, 
+    #experience-container > div {
+        transition: all 0.3s ease;
+    }
+    
+    #education-container > div:hover, 
+    #experience-container > div:hover {
+        transform: translateX(10px);
+    }
+    
+    /* YÜKLEME EKRANI */
+    #loading-screen {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* FOOTER */
+    footer {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    /* RESPONSIVE İYİLEŞTİRMELER */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
         }
-        .text-accent {
-            color: #ef4444; /* Tailwind red-500 */
+        
+        section {
+            margin-bottom: 1.5rem;
+            border-radius: 15px;
         }
-        .bg-accent {
-            background-color: #ef4444;
+        
+        #profile-name {
+            font-size: 2rem;
         }
-        .timeline-line {
-            position: absolute;
-            left: 12px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #e5e7eb;
-        }
-    </style>
+    }
+</style>
 </head>
 <body class="bg-gray-50 antialiased">
 
