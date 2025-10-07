@@ -141,7 +141,7 @@
         const photoPreview = document.getElementById('admin-photo-preview');
 
         const initialProfileData = {
-            name: "[Adınız Soyadınız]",
+            name: "Adınız Soyadınız",
             title: "Kıdemli Yazılım Mimarı | Dijital Stratejist",
             bioText: "Merhaba, ben [Adınız Soyadınız]. Yaratıcı çözümler üreten ve sonuç odaklı bir profesyonelim.",
             expertise: [
@@ -365,11 +365,12 @@
                         <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <label class="form-label">Uzmanlık Adı</label>
-                                <input type="text" class="expertise-name form-input" placeholder="Örn: Veri Analizi" value="${data.name}">
+                                <input type="text" class="expertise-name form-input" placeholder="Örn: Web Geliştirme" value="${data.name}">
                             </div>
                             <div>
                                 <label class="form-label">Lucide İkon Adı</label>
-                                <input type="text" class="expertise-icon form-input" placeholder="Örn: bar-chart-2" value="${data.icon}">
+                                <input type="text" class="expertise-icon form-input" placeholder="Örn: code" value="${data.icon}">
+                                <p class="text-xs text-gray-500 mt-1">Lucide ikon isimleri: code, database, bar-chart-2, etc.</p>
                             </div>
                         </div>
                         <button type="button" onclick="removeParentItem(this)" class="btn-danger mt-6 flex items-center space-x-1">
@@ -397,21 +398,21 @@
                 <div class="dynamic-item fade-in">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                         <div>
-                            <label class="form-label">Derece</label>
-                            <input type="text" class="education-degree form-input" placeholder="Örn: Yüksek Lisans" value="${data.degree}">
+                            <label class="form-label">Derece / Program</label>
+                            <input type="text" class="education-degree form-input" placeholder="Örn: Lisans, Bilgisayar Mühendisliği" value="${data.degree}">
                         </div>
                         <div>
-                            <label class="form-label">Kurum</label>
-                            <input type="text" class="education-institution form-input" placeholder="Örn: İTÜ" value="${data.institution}">
+                            <label class="form-label">Eğitim Kurumu</label>
+                            <input type="text" class="education-institution form-input" placeholder="Örn: İstanbul Teknik Üniversitesi" value="${data.institution}">
                         </div>
                         <div>
-                            <label class="form-label">Yıl</label>
-                            <input type="text" class="education-years form-input" placeholder="Örn: 2018-2020" value="${data.years}">
+                            <label class="form-label">Eğitim Dönemi</label>
+                            <input type="text" class="education-years form-input" placeholder="Örn: 2018 - 2022" value="${data.years}">
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Açıklama</label>
-                        <textarea class="education-description form-input" placeholder="Eğitim detayları...">${data.description}</textarea>
+                        <label class="form-label">Eğitim Açıklaması</label>
+                        <textarea class="education-description form-input" placeholder="Eğitim sürecinde elde ettiğiniz başarılar, odaklandığınız alanlar..." rows="2">${data.description}</textarea>
                     </div>
                     <div class="flex justify-end">
                         <button type="button" onclick="removeParentItem(this)" class="btn-danger flex items-center space-x-1">
@@ -441,21 +442,21 @@
                 <div class="dynamic-item fade-in">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                         <div>
-                            <label class="form-label">Pozisyon</label>
-                            <input type="text" class="experience-title form-input" placeholder="Örn: Yazılım Mimarı" value="${data.title}">
+                            <label class="form-label">Pozisyon / Rol</label>
+                            <input type="text" class="experience-title form-input" placeholder="Örn: Frontend Developer" value="${data.title}">
                         </div>
                         <div>
-                            <label class="form-label">Şirket</label>
-                            <input type="text" class="experience-company form-input" placeholder="Örn: ABC Şirketi" value="${data.company}">
+                            <label class="form-label">Şirket / Organizasyon</label>
+                            <input type="text" class="experience-company form-input" placeholder="Örn: ABC Teknoloji A.Ş." value="${data.company}">
                         </div>
                         <div>
-                            <label class="form-label">Yıl</label>
-                            <input type="text" class="experience-years form-input" placeholder="Örn: 2020-2023" value="${data.years}">
+                            <label class="form-label">Çalışma Dönemi</label>
+                            <input type="text" class="experience-years form-input" placeholder="Örn: 2021 - 2023" value="${data.years}">
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Açıklama</label>
-                        <textarea class="experience-description form-input" placeholder="İş deneyimi detayları...">${data.description}</textarea>
+                        <label class="form-label">İş Açıklaması</label>
+                        <textarea class="experience-description form-input" placeholder="Görev ve sorumluluklarınız, başarılarınız, katkılarınız..." rows="3">${data.description}</textarea>
                     </div>
                     <div class="flex justify-end">
                         <button type="button" onclick="removeParentItem(this)" class="btn-danger flex items-center space-x-1">
@@ -496,8 +497,8 @@
             </div>
             <form id="login-form" class="space-y-4">
                 <div>
-                    <label for="admin-email" class="form-label">E-posta</label>
-                    <input type="email" id="admin-email" placeholder="ornek@email.com" required class="form-input">
+                    <label for="admin-email" class="form-label">E-posta Adresi</label>
+                    <input type="email" id="admin-email" placeholder="ornek@firma.com" required class="form-input">
                 </div>
                 <div>
                     <label for="admin-password" class="form-label">Parola</label>
@@ -542,14 +543,14 @@
                     <input type="text" id="admin-name" class="form-input" placeholder="Örn: Ahmet Yılmaz">
                 </div>
                 <div>
-                    <label for="admin-title-job" class="form-label">Pozisyon / Başlık</label>
-                    <input type="text" id="admin-title-job" class="form-input" placeholder="Örn: Kıdemli Yazılım Mimarı">
+                    <label for="admin-title-job" class="form-label">Pozisyon / Meslek</label>
+                    <input type="text" id="admin-title-job" class="form-input" placeholder="Örn: Senior Frontend Developer">
                 </div>
             </div>
             
             <div>
-                <label for="admin-bio" class="form-label">Hakkında</label>
-                <textarea id="admin-bio" rows="4" class="form-input" placeholder="Kendiniz hakkında kısa bir açıklama..."></textarea>
+                <label for="admin-bio" class="form-label">Profesyonel Özet</label>
+                <textarea id="admin-bio" rows="4" class="form-input" placeholder="Kendiniz ve uzmanlık alanlarınız hakkında kısa bir tanıtım yazısı..."></textarea>
             </div>
             
             <!-- Profil Fotoğrafı -->
@@ -557,7 +558,7 @@
                 <div>
                     <label for="admin-photo" class="form-label">Profil Fotoğrafı</label>
                     <input type="file" id="admin-photo" accept="image/*" class="form-input">
-                    <p class="text-gray-500 text-sm mt-1">JPG, PNG veya GIF formatında yükleyin</p>
+                    <p class="text-gray-500 text-sm mt-1">JPG, PNG veya GIF formatında yükleyin (max 5MB)</p>
                 </div>
                 <div class="flex justify-center md:justify-start">
                     <img id="admin-photo-preview" src="" alt="Profil Önizleme" class="w-32 h-32 object-cover rounded-full border-4 border-gray-200 hidden">
@@ -571,15 +572,15 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label for="admin-linkedin" class="form-label">LinkedIn</label>
-                        <input type="text" id="admin-linkedin" class="form-input" placeholder="https://linkedin.com/in/...">
+                        <label for="admin-linkedin" class="form-label">LinkedIn Profil URL</label>
+                        <input type="text" id="admin-linkedin" class="form-input" placeholder="https://linkedin.com/in/kullaniciadi">
                     </div>
                     <div>
-                        <label for="admin-github" class="form-label">GitHub</label>
-                        <input type="text" id="admin-github" class="form-input" placeholder="https://github.com/...">
+                        <label for="admin-github" class="form-label">GitHub Profil URL</label>
+                        <input type="text" id="admin-github" class="form-input" placeholder="https://github.com/kullaniciadi">
                     </div>
                     <div>
-                        <label for="admin-email-contact" class="form-label">E-posta</label>
+                        <label for="admin-email-contact" class="form-label">İletişim E-posta</label>
                         <input type="text" id="admin-email-contact" class="form-input" placeholder="mailto:ornek@email.com">
                     </div>
                 </div>
@@ -592,12 +593,12 @@
             <section class="bg-white p-6 rounded-2xl card-shadow space-y-4 lg:col-span-1">
                 <div class="flex items-center space-x-2 border-b pb-3">
                     <i data-lucide="award" class="w-5 h-5 text-primary"></i>
-                    <h2 class="text-xl font-semibold text-gray-800">Uzmanlıklar</h2>
+                    <h2 class="text-xl font-semibold text-gray-800">Uzmanlık Alanları</h2>
                 </div>
                 <div id="expertise-items-container" class="space-y-4 max-h-96 overflow-y-auto p-1"></div>
                 <button type="button" onclick="addExpertiseItem()" class="btn-primary w-full flex items-center justify-center space-x-2">
                     <i data-lucide="plus" class="w-5 h-5"></i>
-                    <span>Uzmanlık Ekle</span>
+                    <span>Yeni Uzmanlık Ekle</span>
                 </button>
             </section>
 
@@ -607,12 +608,12 @@
                 <section class="bg-white p-6 rounded-2xl card-shadow space-y-4">
                     <div class="flex items-center space-x-2 border-b pb-3">
                         <i data-lucide="graduation-cap" class="w-5 h-5 text-secondary"></i>
-                        <h2 class="text-xl font-semibold text-gray-800">Eğitim Bilgileri</h2>
+                        <h2 class="text-xl font-semibold text-gray-800">Eğitim Geçmişi</h2>
                     </div>
                     <div id="education-items-container" class="space-y-4 max-h-96 overflow-y-auto p-1"></div>
                     <button type="button" onclick="addEducationItem()" class="btn-secondary w-full flex items-center justify-center space-x-2">
                         <i data-lucide="plus" class="w-5 h-5"></i>
-                        <span>Eğitim Ekle</span>
+                        <span>Yeni Eğitim Ekle</span>
                     </button>
                 </section>
 
@@ -625,7 +626,7 @@
                     <div id="experience-items-container" class="space-y-4 max-h-96 overflow-y-auto p-1"></div>
                     <button type="button" onclick="addExperienceItem()" class="btn-accent w-full flex items-center justify-center space-x-2">
                         <i data-lucide="plus" class="w-5 h-5"></i>
-                        <span>Deneyim Ekle</span>
+                        <span>Yeni Deneyim Ekle</span>
                     </button>
                 </section>
             </div>
