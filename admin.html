@@ -5,18 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Düzenleme</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind konfigürasyonu, dark mode'u class üzerinden yönetecek şekilde ayarlandı -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6', // blue-500
+                    },
+                }
+            }
+        }
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-500">
     
-    <!-- Firebase -->
+    <!-- Firebase ve Uygulama Mantığı -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // Firebase config
+        // Firebase config (DİKKAT: Bu konfigürasyon sadece örnek amaçlıdır.)
         const firebaseConfig = {
             apiKey: "AIzaSyBF0bchfUsw4yo1q1wU-rowR8RZ24CDgJ0",
             authDomain: "mete-73d7c.firebaseapp.com",
@@ -36,6 +49,45 @@
         const PROFILE_DOC_ID = 'main_professional_profile';
         let userId = null;
         let uploadedPhotoURL = null;
+
+        /** TEMA YÖNETİMİ BAŞLANGIÇ */
+
+        // Temayı HTML elementine uygular ve ikonu günceller
+        function applyTheme(theme) {
+            const htmlEl = document.documentElement;
+            const themeIcon = document.getElementById('theme-toggle-icon');
+
+            if (theme === 'dark') {
+                htmlEl.classList.add('dark');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun'); // Karanlık modda güneş ikonunu göster
+            } else {
+                htmlEl.classList.remove('dark');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon'); // Aydınlık modda ay ikonunu göster
+            }
+            // İkonu yeniden oluştur
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Kaydedilen temayı localStorage'dan yükler
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+        }
+
+        // Temayı değiştirir ve localStorage'a kaydeder
+        function toggleTheme() {
+            const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        }
+        
+        // Sayfa yüklendiğinde temayı uygula
+        window.addEventListener('DOMContentLoaded', loadTheme);
+
+        /** TEMA YÖNETİMİ SONU */
 
         // Check auth state
         onAuthStateChanged(auth, (user) => {
@@ -72,6 +124,7 @@
         // Load profile data
         async function loadProfileData() {
             try {
+                // Not: Güvenlik kurallarınıza göre bu yolun herkesin okumasına açık olması gerekir
                 const docRef = doc(db, 'artifacts', 'mete-73d7c', 'public', 'data', 'profiles', PROFILE_DOC_ID);
                 const docSnap = await getDoc(docRef);
 
@@ -117,33 +170,36 @@
         function addListItem(type, data = {}) {
             const container = document.getElementById(`${type}-container`);
             let html = '';
+            // Tailwind dark mode classes added to inputs/textareas: dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+            const inputClasses = "w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600";
+            const inputClassesMb = inputClasses + " mb-2";
 
             if (type === 'expertise') {
                 html = `
-                    <div class="border p-3 rounded mb-2">
-                        <input type="text" placeholder="Uzmanlık adı" value="${data.name || ''}" class="expertise-name w-full p-2 border rounded mb-2">
-                        <input type="text" placeholder="İkon adı" value="${data.icon || ''}" class="expertise-icon w-full p-2 border rounded">
-                        <button onclick="removeItem(this)" class="mt-2 bg-red-500 text-white px-3 py-1 rounded text-sm">Sil</button>
+                    <div class="border dark:border-gray-700 p-3 rounded mb-2 bg-gray-50 dark:bg-gray-800">
+                        <input type="text" placeholder="Uzmanlık adı" value="${data.name || ''}" class="expertise-name ${inputClassesMb}">
+                        <input type="text" placeholder="İkon adı (Lucide ikon adı)" value="${data.icon || ''}" class="expertise-icon ${inputClasses}">
+                        <button onclick="removeItem(this)" class="mt-2 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">Sil</button>
                     </div>
                 `;
             } else if (type === 'education') {
                 html = `
-                    <div class="border p-3 rounded mb-2">
-                        <input type="text" placeholder="Derece" value="${data.degree || ''}" class="w-full p-2 border rounded mb-2">
-                        <input type="text" placeholder="Okul" value="${data.institution || ''}" class="w-full p-2 border rounded mb-2">
-                        <input type="text" placeholder="Yıllar" value="${data.years || ''}" class="w-full p-2 border rounded mb-2">
-                        <textarea placeholder="Açıklama" class="w-full p-2 border rounded mb-2">${data.description || ''}</textarea>
-                        <button onclick="removeItem(this)" class="bg-red-500 text-white px-3 py-1 rounded text-sm">Sil</button>
+                    <div class="border dark:border-gray-700 p-3 rounded mb-2 bg-gray-50 dark:bg-gray-800">
+                        <input type="text" placeholder="Derece" value="${data.degree || ''}" class="${inputClassesMb}">
+                        <input type="text" placeholder="Okul" value="${data.institution || ''}" class="${inputClassesMb}">
+                        <input type="text" placeholder="Yıllar" value="${data.years || ''}" class="${inputClassesMb}">
+                        <textarea placeholder="Açıklama" class="${inputClassesMb} resize-none">${data.description || ''}</textarea>
+                        <button onclick="removeItem(this)" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">Sil</button>
                     </div>
                 `;
             } else if (type === 'experience') {
                 html = `
-                    <div class="border p-3 rounded mb-2">
-                        <input type="text" placeholder="Pozisyon" value="${data.title || ''}" class="w-full p-2 border rounded mb-2">
-                        <input type="text" placeholder="Şirket" value="${data.company || ''}" class="w-full p-2 border rounded mb-2">
-                        <input type="text" placeholder="Yıllar" value="${data.years || ''}" class="w-full p-2 border rounded mb-2">
-                        <textarea placeholder="Açıklama" class="w-full p-2 border rounded mb-2">${data.description || ''}</textarea>
-                        <button onclick="removeItem(this)" class="bg-red-500 text-white px-3 py-1 rounded text-sm">Sil</button>
+                    <div class="border dark:border-gray-700 p-3 rounded mb-2 bg-gray-50 dark:bg-gray-800">
+                        <input type="text" placeholder="Pozisyon" value="${data.title || ''}" class="${inputClassesMb}">
+                        <input type="text" placeholder="Şirket" value="${data.company || ''}" class="${inputClassesMb}">
+                        <input type="text" placeholder="Yıllar" value="${data.years || ''}" class="${inputClassesMb}">
+                        <textarea placeholder="Açıklama" class="${inputClassesMb} resize-none">${data.description || ''}</textarea>
+                        <button onclick="removeItem(this)" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">Sil</button>
                     </div>
                 `;
             }
@@ -176,6 +232,7 @@
                 uploadedPhotoURL = await getDownloadURL(storageRef);
                 showMessage('Fotoğraf yüklendi!', 'green');
             } catch (error) {
+                console.error('Fotoğraf yükleme hatası:', error);
                 showMessage('Fotoğraf yükleme hatası!', 'red');
             }
         }
@@ -277,24 +334,25 @@
         window.uploadPhoto = uploadPhoto;
         window.saveAll = saveAll;
         window.removeItem = removeItem;
+        window.toggleTheme = toggleTheme; // Yeni eklenen tema fonksiyonu
         window.addExpertise = () => addListItem('expertise');
         window.addEducation = () => addListItem('education');
         window.addExperience = () => addListItem('experience');
     </script>
 
     <!-- Login Screen -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-blue-600">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h2 class="text-2xl font-bold text-center mb-6">Yönetici Girişi</h2>
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-blue-600 dark:bg-blue-800 transition-colors duration-500">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-96">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">Yönetici Girişi</h2>
             
             <div class="space-y-4">
                 <div>
-                    <input type="email" id="email" placeholder="E-posta" class="w-full p-3 border rounded">
+                    <input type="email" id="email" placeholder="E-posta" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
                 </div>
                 <div>
-                    <input type="password" id="password" placeholder="Parola" class="w-full p-3 border rounded">
+                    <input type="password" id="password" placeholder="Parola" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
                 </div>
-                <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700">
+                <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition duration-300">
                     Giriş Yap
                 </button>
                 <p id="login-error" class="text-red-500 text-center"></p>
@@ -305,81 +363,100 @@
     <!-- Admin Panel -->
     <div id="admin-content" class="hidden p-4 max-w-4xl mx-auto">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Profil Düzenleme</h1>
-            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded flex items-center gap-2">
-                <i data-lucide="log-out" class="w-4 h-4"></i>
-                Çıkış
-            </button>
+        <div class="flex justify-between items-center mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-gray-100">Profil Düzenleme</h1>
+            <div class="flex gap-3">
+                <!-- TEMA DEĞİŞTİRME BUTONU -->
+                <button onclick="toggleTheme()" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-full flex items-center gap-2 transition duration-300 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-md">
+                    <i id="theme-toggle-icon" data-lucide="moon" class="w-5 h-5"></i>
+                </button>
+                <!-- ÇIKIŞ BUTONU -->
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-red-600 transition shadow-md">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    Çıkış
+                </button>
+            </div>
         </div>
 
         <!-- Message -->
-        <div id="message" class="hidden"></div>
+        <div id="message" class="hidden text-center font-medium"></div>
 
         <!-- Basic Info -->
-        <div class="bg-white p-6 rounded-lg shadow mb-4">
-            <h2 class="text-xl font-bold mb-4">Temel Bilgiler</h2>
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6 transition-colors duration-500">
+            <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 border-b pb-2 dark:border-gray-700">Temel Bilgiler</h2>
             
             <div class="space-y-4">
-                <input type="text" id="name" placeholder="Ad Soyad" class="w-full p-3 border rounded">
-                <input type="text" id="title" placeholder="Pozisyon/Ünvan" class="w-full p-3 border rounded">
-                <textarea id="bio" placeholder="Hakkında" class="w-full p-3 border rounded" rows="4"></textarea>
+                <input type="text" id="name" placeholder="Ad Soyad" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                <input type="text" id="title" placeholder="Pozisyon/Ünvan" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                <textarea id="bio" placeholder="Hakkında" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" rows="4"></textarea>
                 
                 <div class="flex gap-4 items-start">
                     <div class="flex-1">
-                        <input type="file" onchange="uploadPhoto(event)" class="w-full p-2 border rounded">
+                        <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Profil Fotoğrafı Yükle</label>
+                        <input type="file" onchange="uploadPhoto(event)" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                     </div>
-                    <img id="photo-preview" class="w-20 h-20 rounded object-cover hidden">
+                    <img id="photo-preview" class="w-24 h-24 rounded-full object-cover hidden border-4 border-gray-200 dark:border-gray-600 shadow-md" alt="Profil Fotoğrafı Önizleme">
                 </div>
             </div>
         </div>
 
         <!-- Social Media -->
-        <div class="bg-white p-6 rounded-lg shadow mb-4">
-            <h2 class="text-xl font-bold mb-4">Sosyal Medya</h2>
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6 transition-colors duration-500">
+            <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 border-b pb-2 dark:border-gray-700">Sosyal Medya</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" id="linkedin" placeholder="LinkedIn URL" class="p-3 border rounded">
-                <input type="text" id="github" placeholder="GitHub URL" class="p-3 border rounded">
-                <input type="text" id="email-contact" placeholder="E-posta" class="p-3 border rounded">
+                <input type="text" id="linkedin" placeholder="LinkedIn URL" class="p-3 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                <input type="text" id="github" placeholder="GitHub URL" class="p-3 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                <input type="text" id="email-contact" placeholder="E-posta" class="p-3 border rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
             </div>
         </div>
 
         <!-- Expertise -->
-        <div class="bg-white p-6 rounded-lg shadow mb-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6 transition-colors duration-500">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Uzmanlık Alanları</h2>
-                <button onclick="addExpertise()" class="bg-green-500 text-white px-4 py-2 rounded">+ Ekle</button>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Uzmanlık Alanları</h2>
+                <button onclick="addExpertise()" class="bg-green-500 text-white px-4 py-2 rounded-full flex items-center gap-1 hover:bg-green-600 transition shadow-md">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Ekle
+                </button>
             </div>
             <div id="expertise-container"></div>
         </div>
 
         <!-- Education -->
-        <div class="bg-white p-6 rounded-lg shadow mb-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6 transition-colors duration-500">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Eğitim</h2>
-                <button onclick="addEducation()" class="bg-green-500 text-white px-4 py-2 rounded">+ Ekle</button>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Eğitim</h2>
+                <button onclick="addEducation()" class="bg-green-500 text-white px-4 py-2 rounded-full flex items-center gap-1 hover:bg-green-600 transition shadow-md">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Ekle
+                </button>
             </div>
             <div id="education-container"></div>
         </div>
 
         <!-- Experience -->
-        <div class="bg-white p-6 rounded-lg shadow mb-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6 transition-colors duration-500">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">İş Deneyimi</h2>
-                <button onclick="addExperience()" class="bg-green-500 text-white px-4 py-2 rounded">+ Ekle</button>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">İş Deneyimi</h2>
+                <button onclick="addExperience()" class="bg-green-500 text-white px-4 py-2 rounded-full flex items-center gap-1 hover:bg-green-600 transition shadow-md">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Ekle
+                </button>
             </div>
             <div id="experience-container"></div>
         </div>
 
         <!-- Save Button -->
-        <button id="save-btn" onclick="saveAll()" class="w-full bg-blue-600 text-white p-4 rounded-lg text-lg font-bold hover:bg-blue-700">
+        <button id="save-btn" onclick="saveAll()" class="w-full bg-blue-600 text-white p-4 rounded-xl text-lg font-bold hover:bg-blue-700 transition duration-300 shadow-xl mb-12">
             Tümünü Kaydet
         </button>
     </div>
 
     <script>
-        lucide.createIcons();
+        // Sayfa tamamen yüklendiğinde Lucide ikonlarını oluştur
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
     </script>
 </body>
 </html>
