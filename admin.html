@@ -10,14 +10,87 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        :root { font-family: 'Inter', sans-serif; }
-        .text-accent { color: #ef4444; }
-        .bg-accent { background-color: #ef4444; }
-        textarea { resize: vertical; }
-        .input-group { margin-bottom: 1rem; }
+        :root { 
+            font-family: 'Inter', sans-serif; 
+        }
+        
+        /* Yeni Renk Paleti */
+        .text-primary { color: #3b82f6; }
+        .bg-primary { background-color: #3b82f6; }
+        .text-secondary { color: #8b5cf6; }
+        .bg-secondary { background-color: #8b5cf6; }
+        .text-accent { color: #10b981; }
+        .bg-accent { background-color: #10b981; }
+        
+        /* Gradient Arkaplan */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        /* Kart Gölgeleri */
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Animasyonlar */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        /* Özel Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Input Stilleri */
+        .form-input {
+            @apply w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary transition duration-200;
+        }
+        
+        .form-label {
+            @apply block mb-2 font-medium text-gray-700;
+        }
+        
+        .btn-primary {
+            @apply bg-primary text-white px-4 py-3 rounded-xl hover:bg-blue-600 transition duration-300 font-medium;
+        }
+        
+        .btn-secondary {
+            @apply bg-secondary text-white px-4 py-3 rounded-xl hover:bg-purple-600 transition duration-300 font-medium;
+        }
+        
+        .btn-accent {
+            @apply bg-accent text-white px-4 py-3 rounded-xl hover:bg-green-600 transition duration-300 font-medium;
+        }
+        
+        .btn-danger {
+            @apply bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300;
+        }
+        
+        .dynamic-item {
+            @apply bg-gray-50 p-4 rounded-xl border border-gray-200 card-shadow mb-4 transition duration-300 hover:border-primary/30;
+        }
     </style>
 </head>
-<body class="bg-gray-100 antialiased min-h-screen flex flex-col">
+<body class="bg-gray-50 antialiased min-h-screen">
 
     <!-- Firebase SDK Imports -->
     <script type="module">
@@ -287,14 +360,23 @@
 
         function getExpertiseTemplate(data = { name: '', icon: '' }) {
             return `
-                <div class="dynamic-item bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm flex items-start space-x-4 mb-3">
-                    <div class="flex-grow grid grid-cols-2 gap-3">
-                        <input type="text" class="expertise-name w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Uzmanlık Adı" value="${data.name}">
-                        <input type="text" class="expertise-icon w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Lucide İkon Adı" value="${data.icon}">
+                <div class="dynamic-item fade-in">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="form-label">Uzmanlık Adı</label>
+                                <input type="text" class="expertise-name form-input" placeholder="Örn: Veri Analizi" value="${data.name}">
+                            </div>
+                            <div>
+                                <label class="form-label">Lucide İkon Adı</label>
+                                <input type="text" class="expertise-icon form-input" placeholder="Örn: bar-chart-2" value="${data.icon}">
+                            </div>
+                        </div>
+                        <button type="button" onclick="removeParentItem(this)" class="btn-danger mt-6 flex items-center space-x-1">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            <span>Sil</span>
+                        </button>
                     </div>
-                    <button type="button" onclick="removeParentItem(this)" class="remove-item-btn p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
                 </div>
             `;
         }
@@ -312,16 +394,31 @@
 
         function getEducationTemplate(data = { degree: '', institution: '', years: '', description: '' }) {
             return `
-                <div class="dynamic-item bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col space-y-2 mb-3">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="text" class="education-degree p-2 border border-gray-300 rounded-lg text-sm" placeholder="Derece" value="${data.degree}">
-                        <input type="text" class="education-institution p-2 border border-gray-300 rounded-lg text-sm" placeholder="Kurum" value="${data.institution}">
-                        <input type="text" class="education-years p-2 border border-gray-300 rounded-lg text-sm" placeholder="Yıl" value="${data.years}">
+                <div class="dynamic-item fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                        <div>
+                            <label class="form-label">Derece</label>
+                            <input type="text" class="education-degree form-input" placeholder="Örn: Yüksek Lisans" value="${data.degree}">
+                        </div>
+                        <div>
+                            <label class="form-label">Kurum</label>
+                            <input type="text" class="education-institution form-input" placeholder="Örn: İTÜ" value="${data.institution}">
+                        </div>
+                        <div>
+                            <label class="form-label">Yıl</label>
+                            <input type="text" class="education-years form-input" placeholder="Örn: 2018-2020" value="${data.years}">
+                        </div>
                     </div>
-                    <textarea class="education-description p-2 border border-gray-300 rounded-lg text-sm" placeholder="Açıklama">${data.description}</textarea>
-                    <button type="button" onclick="removeParentItem(this)" class="remove-item-btn p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition w-24 self-end">
-                        <i data-lucide="x" class="w-4 h-4"></i> Sil
-                    </button>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="education-description form-input" placeholder="Eğitim detayları...">${data.description}</textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" onclick="removeParentItem(this)" class="btn-danger flex items-center space-x-1">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            <span>Sil</span>
+                        </button>
+                    </div>
                 </div>
             `;
         }
@@ -341,16 +438,31 @@
 
         function getExperienceTemplate(data = { title: '', company: '', years: '', description: '' }) {
             return `
-                <div class="dynamic-item bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col space-y-2 mb-3">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="text" class="experience-title p-2 border border-gray-300 rounded-lg text-sm" placeholder="Pozisyon" value="${data.title}">
-                        <input type="text" class="experience-company p-2 border border-gray-300 rounded-lg text-sm" placeholder="Şirket" value="${data.company}">
-                        <input type="text" class="experience-years p-2 border border-gray-300 rounded-lg text-sm" placeholder="Yıl" value="${data.years}">
+                <div class="dynamic-item fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                        <div>
+                            <label class="form-label">Pozisyon</label>
+                            <input type="text" class="experience-title form-input" placeholder="Örn: Yazılım Mimarı" value="${data.title}">
+                        </div>
+                        <div>
+                            <label class="form-label">Şirket</label>
+                            <input type="text" class="experience-company form-input" placeholder="Örn: ABC Şirketi" value="${data.company}">
+                        </div>
+                        <div>
+                            <label class="form-label">Yıl</label>
+                            <input type="text" class="experience-years form-input" placeholder="Örn: 2020-2023" value="${data.years}">
+                        </div>
                     </div>
-                    <textarea class="experience-description p-2 border border-gray-300 rounded-lg text-sm" placeholder="Açıklama">${data.description}</textarea>
-                    <button type="button" onclick="removeParentItem(this)" class="remove-item-btn p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition w-24 self-end">
-                        <i data-lucide="x" class="w-4 h-4"></i> Sil
-                    </button>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="experience-description form-input" placeholder="İş deneyimi detayları...">${data.description}</textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" onclick="removeParentItem(this)" class="btn-danger flex items-center space-x-1">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            <span>Sil</span>
+                        </button>
+                    </div>
                 </div>
             `;
         }
@@ -374,76 +486,171 @@
         saveAdminDataButton.addEventListener('click', saveAdminData);
     </script>
 
-    <!-- --- UI --- -->
-    <div id="login-screen" class="h-screen flex flex-col justify-center items-center bg-gray-50">
-        <h2 class="text-2xl font-bold mb-4">Yönetici Girişi</h2>
-        <form id="login-form" class="flex flex-col w-80 bg-white p-6 rounded-lg shadow-md space-y-3">
-            <input type="email" id="admin-email" placeholder="E-posta" required class="p-2 border border-gray-300 rounded-lg">
-            <input type="password" id="admin-password" placeholder="Parola" required class="p-2 border border-gray-300 rounded-lg">
-            <button type="submit" id="login-button" class="bg-accent text-white p-2 rounded-lg hover:bg-red-600 transition">Giriş Yap</button>
-            <p id="login-error" class="text-red-600 text-sm mt-1"></p>
-        </form>
+    <!-- Giriş Ekranı -->
+    <div id="login-screen" class="min-h-screen flex flex-col justify-center items-center gradient-bg">
+        <div class="bg-white p-8 rounded-2xl card-shadow w-full max-w-md fade-in">
+            <div class="text-center mb-6">
+                <i data-lucide="shield" class="w-12 h-12 text-primary mx-auto mb-3"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Yönetici Girişi</h2>
+                <p class="text-gray-600 mt-2">Lütfen hesap bilgilerinizle giriş yapın</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="admin-email" class="form-label">E-posta</label>
+                    <input type="email" id="admin-email" placeholder="ornek@email.com" required class="form-input">
+                </div>
+                <div>
+                    <label for="admin-password" class="form-label">Parola</label>
+                    <input type="password" id="admin-password" placeholder="••••••••" required class="form-input">
+                </div>
+                <button type="submit" id="login-button" class="btn-primary w-full flex items-center justify-center space-x-2">
+                    <i data-lucide="log-in" class="w-5 h-5"></i>
+                    <span>Giriş Yap</span>
+                </button>
+                <p id="login-error" class="text-red-600 text-sm mt-2 text-center"></p>
+            </form>
+        </div>
     </div>
 
-    <div id="admin-content" class="hidden p-6 space-y-6">
-        <header class="flex justify-between items-center mb-6">
-            <h1 id="admin-header-title" class="text-2xl font-bold"></h1>
-            <button id="logout-button" class="bg-gray-300 p-2 rounded-lg hover:bg-gray-400 transition hidden">Çıkış Yap</button>
+    <!-- Yönetici Paneli -->
+    <div id="admin-content" class="hidden p-4 md:p-6 space-y-6 max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 p-4 bg-white rounded-2xl card-shadow">
+            <div class="flex items-center space-x-3">
+                <i data-lucide="settings" class="w-8 h-8 text-primary"></i>
+                <div>
+                    <h1 id="admin-header-title" class="text-xl font-bold text-gray-800"></h1>
+                    <p class="text-gray-600 text-sm">Profil içeriğinizi buradan düzenleyebilirsiniz</p>
+                </div>
+            </div>
+            <button id="logout-button" class="btn-danger flex items-center space-x-2 hidden">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                <span>Çıkış Yap</span>
+            </button>
         </header>
 
-        <section class="bg-white p-6 rounded-lg shadow-md space-y-4">
-            <h2 class="text-xl font-semibold mb-3">Temel Profil Bilgileri</h2>
-            <div class="input-group">
-                <label for="admin-name" class="block mb-1 font-medium">Ad Soyad</label>
-                <input type="text" id="admin-name" class="w-full p-2 border border-gray-300 rounded-lg">
+        <!-- Temel Bilgiler -->
+        <section class="bg-white p-6 rounded-2xl card-shadow space-y-6 fade-in">
+            <div class="flex items-center space-x-2 border-b pb-3">
+                <i data-lucide="user" class="w-6 h-6 text-primary"></i>
+                <h2 class="text-xl font-semibold text-gray-800">Temel Profil Bilgileri</h2>
             </div>
-            <div class="input-group">
-                <label for="admin-title-job" class="block mb-1 font-medium">Pozisyon / Başlık</label>
-                <input type="text" id="admin-title-job" class="w-full p-2 border border-gray-300 rounded-lg">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="admin-name" class="form-label">Ad Soyad</label>
+                    <input type="text" id="admin-name" class="form-input" placeholder="Örn: Ahmet Yılmaz">
+                </div>
+                <div>
+                    <label for="admin-title-job" class="form-label">Pozisyon / Başlık</label>
+                    <input type="text" id="admin-title-job" class="form-input" placeholder="Örn: Kıdemli Yazılım Mimarı">
+                </div>
             </div>
-            <div class="input-group">
-                <label for="admin-bio" class="block mb-1 font-medium">Hakkında</label>
-                <textarea id="admin-bio" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
+            
+            <div>
+                <label for="admin-bio" class="form-label">Hakkında</label>
+                <textarea id="admin-bio" rows="4" class="form-input" placeholder="Kendiniz hakkında kısa bir açıklama..."></textarea>
             </div>
+            
             <!-- Profil Fotoğrafı -->
-            <div class="input-group">
-                <label for="admin-photo" class="block text-sm font-medium text-gray-700 mb-1">Profil Fotoğrafı</label>
-                <input type="file" id="admin-photo" accept="image/*" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent">
-                <img id="admin-photo-preview" src="" alt="Profil Önizleme" class="mt-2 w-32 h-32 object-cover rounded-full border border-gray-300 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <div>
+                    <label for="admin-photo" class="form-label">Profil Fotoğrafı</label>
+                    <input type="file" id="admin-photo" accept="image/*" class="form-input">
+                    <p class="text-gray-500 text-sm mt-1">JPG, PNG veya GIF formatında yükleyin</p>
+                </div>
+                <div class="flex justify-center md:justify-start">
+                    <img id="admin-photo-preview" src="" alt="Profil Önizleme" class="w-32 h-32 object-cover rounded-full border-4 border-gray-200 hidden">
+                </div>
             </div>
 
-            <h3 class="text-lg font-semibold mt-4">Sosyal Bağlantılar</h3>
-            <div class="grid grid-cols-3 gap-3">
-                <input type="text" id="admin-linkedin" placeholder="LinkedIn" class="p-2 border border-gray-300 rounded-lg text-sm">
-                <input type="text" id="admin-github" placeholder="GitHub" class="p-2 border border-gray-300 rounded-lg text-sm">
-                <input type="text" id="admin-email-contact" placeholder="E-posta" class="p-2 border border-gray-300 rounded-lg text-sm">
+            <div class="border-t pt-4">
+                <div class="flex items-center space-x-2 mb-4">
+                    <i data-lucide="link" class="w-5 h-5 text-secondary"></i>
+                    <h3 class="text-lg font-semibold text-gray-800">Sosyal Bağlantılar</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="admin-linkedin" class="form-label">LinkedIn</label>
+                        <input type="text" id="admin-linkedin" class="form-input" placeholder="https://linkedin.com/in/...">
+                    </div>
+                    <div>
+                        <label for="admin-github" class="form-label">GitHub</label>
+                        <input type="text" id="admin-github" class="form-input" placeholder="https://github.com/...">
+                    </div>
+                    <div>
+                        <label for="admin-email-contact" class="form-label">E-posta</label>
+                        <input type="text" id="admin-email-contact" class="form-input" placeholder="mailto:ornek@email.com">
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Dinamik listeler: Uzmanlık, Eğitim, Deneyim -->
-        <section class="bg-white p-6 rounded-lg shadow-md space-y-4">
-            <h2 class="text-xl font-semibold">Uzmanlıklar</h2>
-            <div id="expertise-items-container"></div>
-            <button type="button" onclick="addExpertiseItem()" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">+ Uzmanlık Ekle</button>
-        </section>
+        <!-- Dinamik listeler -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Uzmanlıklar -->
+            <section class="bg-white p-6 rounded-2xl card-shadow space-y-4 lg:col-span-1">
+                <div class="flex items-center space-x-2 border-b pb-3">
+                    <i data-lucide="award" class="w-5 h-5 text-primary"></i>
+                    <h2 class="text-xl font-semibold text-gray-800">Uzmanlıklar</h2>
+                </div>
+                <div id="expertise-items-container" class="space-y-4 max-h-96 overflow-y-auto p-1"></div>
+                <button type="button" onclick="addExpertiseItem()" class="btn-primary w-full flex items-center justify-center space-x-2">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    <span>Uzmanlık Ekle</span>
+                </button>
+            </section>
 
-        <section class="bg-white p-6 rounded-lg shadow-md space-y-4">
-            <h2 class="text-xl font-semibold">Eğitim Bilgileri</h2>
-            <div id="education-items-container"></div>
-            <button type="button" onclick="addEducationItem()" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">+ Eğitim Ekle</button>
-        </section>
+            <!-- Eğitim ve Deneyim -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Eğitim Bilgileri -->
+                <section class="bg-white p-6 rounded-2xl card-shadow space-y-4">
+                    <div class="flex items-center space-x-2 border-b pb-3">
+                        <i data-lucide="graduation-cap" class="w-5 h-5 text-secondary"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Eğitim Bilgileri</h2>
+                    </div>
+                    <div id="education-items-container" class="space-y-4 max-h-96 overflow-y-auto p-1"></div>
+                    <button type="button" onclick="addEducationItem()" class="btn-secondary w-full flex items-center justify-center space-x-2">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        <span>Eğitim Ekle</span>
+                    </button>
+                </section>
 
-        <section class="bg-white p-6 rounded-lg shadow-md space-y-4">
-            <h2 class="text-xl font-semibold">İş Deneyimleri</h2>
-            <div id="experience-items-container"></div>
-            <button type="button" onclick="addExperienceItem()" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">+ Deneyim Ekle</button>
-        </section>
-
-        <div class="mt-4">
-            <button id="save-admin-data-btn" class="bg-accent text-white px-6 py-3 rounded-lg hover:bg-red-600 transition">TÜM PROFİLİ KAYDET VE YAYINLA</button>
+                <!-- İş Deneyimleri -->
+                <section class="bg-white p-6 rounded-2xl card-shadow space-y-4">
+                    <div class="flex items-center space-x-2 border-b pb-3">
+                        <i data-lucide="briefcase" class="w-5 h-5 text-accent"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">İş Deneyimleri</h2>
+                    </div>
+                    <div id="experience-items-container" class="space-y-4 max-h-96 overflow-y-auto p-1"></div>
+                    <button type="button" onclick="addExperienceItem()" class="btn-accent w-full flex items-center justify-center space-x-2">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        <span>Deneyim Ekle</span>
+                    </button>
+                </section>
+            </div>
         </div>
 
-        <p id="status-message" class="hidden mt-4 p-3 rounded-lg"></p>
+        <!-- Kaydet Butonu -->
+        <div class="sticky bottom-4 bg-white p-4 rounded-2xl card-shadow border border-gray-200">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <h3 class="font-semibold text-gray-800">Değişiklikleri Kaydet</h3>
+                    <p class="text-gray-600 text-sm">Tüm değişiklikleriniz anında yayınlanacaktır</p>
+                </div>
+                <button id="save-admin-data-btn" class="btn-primary flex items-center space-x-2 px-6">
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                    <span>TÜM PROFİLİ KAYDET VE YAYINLA</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Durum Mesajı -->
+        <p id="status-message" class="hidden mt-4 p-4 rounded-xl text-center font-medium"></p>
     </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
